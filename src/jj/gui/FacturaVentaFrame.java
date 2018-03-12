@@ -10,7 +10,9 @@ import javax.persistence.EntityManager;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 import jj.controller.ArticulosJpaController;
+import jj.controller.ClientesJpaController;
 import jj.entity.Articulos;
+import jj.entity.Clientes;
 import jj.util.EntityManagerUtil;
 import jj.util.FacturaDataModel;
 import jj.util.FacturaModelListener;
@@ -27,7 +29,10 @@ public class FacturaVentaFrame extends javax.swing.JFrame {
     private FacturaDataModel facturaDataModel;
     private FacturaModelListener facturaModelListener;
     private ArticulosJpaController articulosController;
+    private ClientesJpaController clientesJpaController;
+    private Clientes consFinal;
     private EntityManager em;
+    
 
     /**
      * Creates new form FacturaVentaFrame
@@ -62,9 +67,21 @@ public class FacturaVentaFrame extends javax.swing.JFrame {
         this.em = EntityManagerUtil.createEntintyManagerFactory();
         
         articulosController = new ArticulosJpaController(em);
+        clientesJpaController = new ClientesJpaController(em);
         
+        consFinal = clientesJpaController.getConsumidorFinal();
     }
-
+    
+    public void loadDatosConsFinal(){
+        this.jTFCI.setText( consFinal.getCliCi() );
+        this.jTFCliente.setText( consFinal.getCliNombres() );
+    }
+    
+    public void clearDatosConsFinal(){
+        this.jTFCI.setText("");
+        this.jTFCliente.setText("");
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

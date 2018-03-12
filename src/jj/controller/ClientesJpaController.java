@@ -194,4 +194,20 @@ public class ClientesJpaController extends BaseJpaController implements Serializ
         }
     }
     
+    public Clientes findById(Integer id){
+
+        String queryStr = "from Clientes o where o.cliId = "+id;
+        Query query = em.createQuery(queryStr);
+        List<Clientes> resultList = query.getResultList();
+        
+        if (resultList != null && resultList.size()>0){
+            return resultList.get(0);
+        }
+
+        return null;
+    }
+    
+    public Clientes getConsumidorFinal(){
+        return findById(-1);
+    }
 }

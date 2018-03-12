@@ -138,8 +138,12 @@ public class ArticulosJpaController extends BaseJpaController implements Seriali
         System.out.println(querystr);
         Query query = em.createQuery(querystr);
         
-        return query.getResultList();
-        
-    }
+        return query.getResultList();        
+    }    
     
+    public List<Articulos> findByNombre(String nombre){
+        String queryStr = "from Articulos a where a.artNombre like '%"+nombre+"%'";
+        Query query = em.createQuery(queryStr);
+        return query.getResultList();
+    }
 }

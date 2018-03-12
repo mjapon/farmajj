@@ -110,8 +110,7 @@ public class FacturaDataModel extends AbstractTableModel{
             frame.updateLabelsTotales();
         }        
         super.setValueAt(aValue, rowIndex, columnIndex); //To change body of generated methods, choose Tools | Templates.
-    }
-    
+    }   
     
 
     @Override
