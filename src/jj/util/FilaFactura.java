@@ -126,17 +126,17 @@ public class FilaFactura {
         
         //Se calcula el total de cada fila        
         this.subtotal = new BigDecimal(this.cantidad).multiply(this.precioUnitario);                
-        this.subtotal.setScale(Ctes.NUM_DECIM_VIEW, BigDecimal.ROUND_HALF_UP);
+        this.subtotal.setScale(CtesU.NUM_DECIM_VIEW, BigDecimal.ROUND_HALF_UP);
         
         if (this.isIva){
-            this.valorIva = this.subtotal.multiply(new BigDecimal(Ctes.IVA));            
+            this.valorIva = this.subtotal.multiply(new BigDecimal(CtesU.IVA));            
         }
         else{
             this.valorIva = BigDecimal.ZERO;
         }
         
         this.total = this.subtotal.add(this.valorIva);
-        this.subtotal.setScale(Ctes.NUM_DECIM_VIEW, BigDecimal.ROUND_HALF_UP);
+        this.subtotal.setScale(CtesU.NUM_DECIM_VIEW, BigDecimal.ROUND_HALF_UP);
         
     }
 

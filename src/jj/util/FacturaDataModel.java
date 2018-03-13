@@ -39,8 +39,8 @@ public class FacturaDataModel extends AbstractTableModel{
         super();
         totalesFactura = new TotalesFactura();
         
-        items.add(new FilaFactura(1,1,"001","ASPIRINA", 1.0, BigDecimal.ONE, false,BigDecimal.ZERO, BigDecimal.ZERO));
-        items.add(new FilaFactura(1,1,"001","ASPIRINA", 1.0, BigDecimal.ONE, false,BigDecimal.ZERO, BigDecimal.ZERO));
+        //items.add(new FilaFactura(1,1,"001","ASPIRINA", 1.0, BigDecimal.ONE, false,BigDecimal.ZERO, BigDecimal.ZERO));
+        //items.add(new FilaFactura(1,1,"001","ASPIRINA", 1.0, BigDecimal.ONE, false,BigDecimal.ZERO, BigDecimal.ZERO));
         
         
         
@@ -110,7 +110,8 @@ public class FacturaDataModel extends AbstractTableModel{
             frame.updateLabelsTotales();
         }        
         super.setValueAt(aValue, rowIndex, columnIndex); //To change body of generated methods, choose Tools | Templates.
-    }   
+    }
+    
     
 
     @Override
@@ -204,6 +205,10 @@ public class FacturaDataModel extends AbstractTableModel{
 
     public void setFrame(FacturaVentaFrame frame) {
         this.frame = frame;
+    }
+    
+    public void encerarTotales(){
+        this.totalesFactura.encerar();
     }
     
     

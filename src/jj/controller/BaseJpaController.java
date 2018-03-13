@@ -5,13 +5,14 @@
  */
 package jj.controller;
 
+import java.util.List;
 import javax.persistence.EntityManager;
-
+import javax.persistence.Query;
 /**
  *
  * @author mjapon
  */
-public class BaseJpaController {
+public class BaseJpaController<T> {
     
     protected EntityManager em;
     
@@ -23,4 +24,18 @@ public class BaseJpaController {
         return this.em;
     }
     
+    public Query newQuery(String queryStr){
+        Query query = em.createQuery(queryStr);
+        return query;
+    }
+    
+    public T getFirstResult(Query query){        
+        List<T> resultList = query.getResultList();
+        if (resultList.size()>0){
+            return resultList.get(0);
+        }
+        else{
+            return null;
+        }
+    }
 }

@@ -6,32 +6,34 @@
 package jj.controller;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import jj.controller.exceptions.NonexistentEntityException;
-import jj.entity.Articulos;
+import jj.entity.Clientes;
+import jj.entity.Secuencias;
 
 /**
  *
  * @author mjapon
  */
-public class ArticulosJpaController extends BaseJpaController implements Serializable {
-    
-    public ArticulosJpaController(EntityManager em){
+public class SecuenciasJpaController extends BaseJpaController<Secuencias> implements Serializable {
+
+
+    public SecuenciasJpaController(EntityManager em) {
         super(em);
     }
 
-    public void create(Articulos articulos) {
+    public void create(Secuencias secuencias) {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            em.persist(articulos);
+            em.persist(secuencias);
             em.getTransaction().commit();
         } finally {
             if (em != null) {
@@ -40,19 +42,19 @@ public class ArticulosJpaController extends BaseJpaController implements Seriali
         }
     }
 
-    public void edit(Articulos articulos) throws NonexistentEntityException, Exception {
+    public void edit(Secuencias secuencias) throws NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            articulos = em.merge(articulos);
+            secuencias = em.merge(secuencias);
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = articulos.getArtId();
-                if (findArticulos(id) == null) {
-                    throw new NonexistentEntityException("The articulos with id " + id + " no longer exists.");
+                Integer id = secuencias.getSecId();
+                if (findSecuencias(id) == null) {
+                    throw new NonexistentEntityException("The secuencias with id " + id + " no longer exists.");
                 }
             }
             throw ex;
@@ -68,14 +70,14 @@ public class ArticulosJpaController extends BaseJpaController implements Seriali
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Articulos articulos;
+            Secuencias secuencias;
             try {
-                articulos = em.getReference(Articulos.class, id);
-                articulos.getArtId();
+                secuencias = em.getReference(Secuencias.class, id);
+                secuencias.getSecId();
             } catch (EntityNotFoundException enfe) {
-                throw new NonexistentEntityException("The articulos with id " + id + " no longer exists.", enfe);
+                throw new NonexistentEntityException("The secuencias with id " + id + " no longer exists.", enfe);
             }
-            em.remove(articulos);
+            em.remove(secuencias);
             em.getTransaction().commit();
         } finally {
             if (em != null) {
@@ -84,19 +86,19 @@ public class ArticulosJpaController extends BaseJpaController implements Seriali
         }
     }
 
-    public List<Articulos> findArticulosEntities() {
-        return findArticulosEntities(true, -1, -1);
+    public List<Secuencias> findSecuenciasEntities() {
+        return findSecuenciasEntities(true, -1, -1);
     }
 
-    public List<Articulos> findArticulosEntities(int maxResults, int firstResult) {
-        return findArticulosEntities(false, maxResults, firstResult);
+    public List<Secuencias> findSecuenciasEntities(int maxResults, int firstResult) {
+        return findSecuenciasEntities(false, maxResults, firstResult);
     }
 
-    private List<Articulos> findArticulosEntities(boolean all, int maxResults, int firstResult) {
+    private List<Secuencias> findSecuenciasEntities(boolean all, int maxResults, int firstResult) {
         EntityManager em = getEntityManager();
         try {
             CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
-            cq.select(cq.from(Articulos.class));
+            cq.select(cq.from(Secuencias.class));
             Query q = em.createQuery(cq);
             if (!all) {
                 q.setMaxResults(maxResults);
@@ -108,20 +110,20 @@ public class ArticulosJpaController extends BaseJpaController implements Seriali
         }
     }
 
-    public Articulos findArticulos(Integer id) {
+    public Secuencias findSecuencias(Integer id) {
         EntityManager em = getEntityManager();
         try {
-            return em.find(Articulos.class, id);
+            return em.find(Secuencias.class, id);
         } finally {
             em.close();
         }
     }
 
-    public int getArticulosCount() {
+    public int getSecuenciasCount() {
         EntityManager em = getEntityManager();
         try {
             CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
-            Root<Articulos> rt = cq.from(Articulos.class);
+            Root<Secuencias> rt = cq.from(Secuencias.class);
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
@@ -130,25 +132,31 @@ public class ArticulosJpaController extends BaseJpaController implements Seriali
         }
     }
     
-    public List<Articulos> findByBarcode(String barcode){
-        String querystr = "from Articulos a where a.artCodbar = '"+barcode.trim()+"'";
-        Query query = em.createQuery(querystr);
-        return query.getResultList();
-        
+    public Secuencias getSecuencia(String clave){        
+        String querystr = "from Secuencias a where a.secClave = '"+clave.trim()+"'";
+        return getFirstResult(newQuery(querystr));
     }
     
-    public void decrementInv(Integer artCodigo, BigDecimal cant){
-        Articulos articulo = em.find(Articulos.class, artCodigo);        
-        if (articulo != null){
-            System.out.println("El articulo es distinto de null-->");
-            
-            BigDecimal artInv = articulo.getArtInv();
-            if (artInv.compareTo(BigDecimal.ZERO)>0){
-                artInv = artInv.subtract(cant);
-            }            
-            
-            articulo.setArtInv(artInv);            
-            em.persist(articulo);
+    public void genSecuencia(String clave) throws Exception{
+        Secuencias secuencia = getSecuencia(clave);
+        if (secuencia != null){
+            secuencia.setSecValor(secuencia.getSecValor()+1 );
+            em.persist(secuencia);
+            //this.edit(secuencia);
         }
     }
+    
+    public void genSecuencia(Integer secuenciaId) throws Exception{
+        
+        Secuencias secuencia = findSecuencias(secuenciaId);
+        if (secuencia != null){
+            secuencia.setSecValor(secuencia.getSecValor()+1 );
+            em.persist(secuencia);
+            //this.edit(secuencia);
+        }
+        
+    }           
+            
+            
+    
 }

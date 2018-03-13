@@ -6,33 +6,40 @@
 package jj.controller;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import jj.controller.exceptions.NonexistentEntityException;
-import jj.entity.Articulos;
+import jj.controller.exceptions.PreexistingEntityException;
+import jj.entity.Ctes;
+import jj.entity.Secuencias;
 
 /**
  *
  * @author mjapon
  */
-public class ArticulosJpaController extends BaseJpaController implements Serializable {
-    
-    public ArticulosJpaController(EntityManager em){
+public class CtesJpaController extends BaseJpaController implements Serializable {
+
+    public CtesJpaController(EntityManager em) {
         super(em);
     }
 
-    public void create(Articulos articulos) {
+    public void create(Ctes ctes) throws PreexistingEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            em.persist(articulos);
+            em.persist(ctes);
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findCtes(ctes.getCtesId()) != null) {
+                throw new PreexistingEntityException("Ctes " + ctes + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -40,19 +47,19 @@ public class ArticulosJpaController extends BaseJpaController implements Seriali
         }
     }
 
-    public void edit(Articulos articulos) throws NonexistentEntityException, Exception {
+    public void edit(Ctes ctes) throws NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            articulos = em.merge(articulos);
+            ctes = em.merge(ctes);
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = articulos.getArtId();
-                if (findArticulos(id) == null) {
-                    throw new NonexistentEntityException("The articulos with id " + id + " no longer exists.");
+                Integer id = ctes.getCtesId();
+                if (findCtes(id) == null) {
+                    throw new NonexistentEntityException("The ctes with id " + id + " no longer exists.");
                 }
             }
             throw ex;
@@ -68,14 +75,14 @@ public class ArticulosJpaController extends BaseJpaController implements Seriali
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Articulos articulos;
+            Ctes ctes;
             try {
-                articulos = em.getReference(Articulos.class, id);
-                articulos.getArtId();
+                ctes = em.getReference(Ctes.class, id);
+                ctes.getCtesId();
             } catch (EntityNotFoundException enfe) {
-                throw new NonexistentEntityException("The articulos with id " + id + " no longer exists.", enfe);
+                throw new NonexistentEntityException("The ctes with id " + id + " no longer exists.", enfe);
             }
-            em.remove(articulos);
+            em.remove(ctes);
             em.getTransaction().commit();
         } finally {
             if (em != null) {
@@ -84,19 +91,19 @@ public class ArticulosJpaController extends BaseJpaController implements Seriali
         }
     }
 
-    public List<Articulos> findArticulosEntities() {
-        return findArticulosEntities(true, -1, -1);
+    public List<Ctes> findCtesEntities() {
+        return findCtesEntities(true, -1, -1);
     }
 
-    public List<Articulos> findArticulosEntities(int maxResults, int firstResult) {
-        return findArticulosEntities(false, maxResults, firstResult);
+    public List<Ctes> findCtesEntities(int maxResults, int firstResult) {
+        return findCtesEntities(false, maxResults, firstResult);
     }
 
-    private List<Articulos> findArticulosEntities(boolean all, int maxResults, int firstResult) {
+    private List<Ctes> findCtesEntities(boolean all, int maxResults, int firstResult) {
         EntityManager em = getEntityManager();
         try {
             CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
-            cq.select(cq.from(Articulos.class));
+            cq.select(cq.from(Ctes.class));
             Query q = em.createQuery(cq);
             if (!all) {
                 q.setMaxResults(maxResults);
@@ -108,20 +115,20 @@ public class ArticulosJpaController extends BaseJpaController implements Seriali
         }
     }
 
-    public Articulos findArticulos(Integer id) {
+    public Ctes findCtes(Integer id) {
         EntityManager em = getEntityManager();
         try {
-            return em.find(Articulos.class, id);
+            return em.find(Ctes.class, id);
         } finally {
             em.close();
         }
     }
 
-    public int getArticulosCount() {
+    public int getCtesCount() {
         EntityManager em = getEntityManager();
         try {
             CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
-            Root<Articulos> rt = cq.from(Articulos.class);
+            Root<Ctes> rt = cq.from(Ctes.class);
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
@@ -130,25 +137,27 @@ public class ArticulosJpaController extends BaseJpaController implements Seriali
         }
     }
     
-    public List<Articulos> findByBarcode(String barcode){
-        String querystr = "from Articulos a where a.artCodbar = '"+barcode.trim()+"'";
-        Query query = em.createQuery(querystr);
-        return query.getResultList();
+    public Ctes findByClave(String clave){
+        
+        String querystr = "from Ctes a where a.ctesClave = '"+clave.trim()+"'";
+        Query query = em.createQuery(querystr);        
+        
+        List<Ctes> ctess = query.getResultList();
+        if (ctess.size()>0){
+            return ctess.get(0);
+        }
+        else{
+            return null;
+        }
         
     }
     
-    public void decrementInv(Integer artCodigo, BigDecimal cant){
-        Articulos articulo = em.find(Articulos.class, artCodigo);        
-        if (articulo != null){
-            System.out.println("El articulo es distinto de null-->");
-            
-            BigDecimal artInv = articulo.getArtInv();
-            if (artInv.compareTo(BigDecimal.ZERO)>0){
-                artInv = artInv.subtract(cant);
-            }            
-            
-            articulo.setArtInv(artInv);            
-            em.persist(articulo);
+    public String findValueByClave(String clave){
+        Ctes ctes = findByClave(clave);
+        if (ctes !=null){
+            return ctes.getCtesValor();
         }
+        return null;
     }
+    
 }

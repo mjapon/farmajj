@@ -22,12 +22,32 @@ import jj.entity.Clientes;
  *
  * @author mjapon
  */
-public class ClientesJpaController extends BaseJpaController implements Serializable {
+public class ClientesJpaController extends BaseJpaController<Clientes> implements Serializable {
 
     public ClientesJpaController(EntityManager em) {
         super(em);
     }    
 
+    
+    public Clientes findByCi(String ci){        
+        String querystr = "from Clientes a where a.cliCi = '"+ci.trim()+"'";      
+        Query query = em.createQuery(querystr);
+        
+        List<Clientes> clientes = query.getResultList();
+        if (clientes.size()>0){
+            return clientes.get(0);
+        }
+        else{
+            return null;
+        }
+    }
+    
+    public Clientes findById(Integer clienteId){
+        Query query = newQuery("from Clientes a where a.cliId = "+ clienteId);        
+        return getFirstResult(query);
+        
+    }
+    
     public void create(Clientes clientes) {
         if (clientes.getFacturasList() == null) {
             clientes.setFacturasList(new ArrayList<Facturas>());
@@ -194,20 +214,6 @@ public class ClientesJpaController extends BaseJpaController implements Serializ
         }
     }
     
-    public Clientes findById(Integer id){
-
-        String queryStr = "from Clientes o where o.cliId = "+id;
-        Query query = em.createQuery(queryStr);
-        List<Clientes> resultList = query.getResultList();
-        
-        if (resultList != null && resultList.size()>0){
-            return resultList.get(0);
-        }
-
-        return null;
-    }
     
-    public Clientes getConsumidorFinal(){
-        return findById(-1);
-    }
+    
 }
